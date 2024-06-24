@@ -59,7 +59,7 @@ class TelegramMessage:
 
     @abc.abstractmethod
     async def send(self, bot, chat_id: int) -> None:
-        raise NotImplementedError("Method not implemented")
+        raise NotImplementedError("Method not implemented")  # pragma: no cover
 
 
 class CounterStrikeNewsMessage(TelegramMessage):

@@ -10,3 +10,5 @@ htmlcov
 
 pytest.xml
 coverage.xml
+
+*.db

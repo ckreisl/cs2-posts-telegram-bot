@@ -43,6 +43,8 @@ class CounterStrike2Posts:
 
             self.__posts.append(Post(**post))
 
+        self.__posts.sort(key=lambda x: x.date, reverse=True)
+
     @classmethod
     def create(cls, posts: dict[str, Any]) -> CounterStrike2Posts:
         return cls(posts)

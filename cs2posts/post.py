@@ -9,6 +9,27 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 
+class PostType(Enum):
+    NEWS = "news"
+    UPDATE = "update"
+    EXTERNAL = "external"
+
+    def __str__(self) -> str:
+        return str(self.value)
+
+    def __repr__(self) -> str:
+        return str(self.value)
+
+    @classmethod
+    def from_post(cls, post: Post) -> PostType:
+        if post.is_news():
+            return cls.NEWS
+        if post.is_update():
+            return cls.UPDATE
+        if post.is_external():
+            return cls.EXTERNAL
+
+
 class FeedType(Enum):
     EXTERN = 0
     INTERN = 1
@@ -57,13 +78,16 @@ class Post:
             return False
         return self.date > other.date
 
-    def is_older_eq_than(self, other: Post) -> bool:
+    def is_older_eq_than(self, other: Post | None) -> bool:
         if other is None:
             return False
         return self.date <= other.date
 
     def get_feed_type(self) -> FeedType:
         return FeedType(self.feed_type)
+
+    def get_type(self) -> PostType:
+        return PostType.from_post(self)
 
     def __getitem__(self, key: str) -> Any:
         return self.to_dict()[key]

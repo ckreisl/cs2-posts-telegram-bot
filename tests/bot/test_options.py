@@ -14,8 +14,7 @@ from cs2posts.bot.options import Options
 @pytest.fixture
 def options():
     options = Options(Mock())
-    options.set_chats(Mock())
-    options.set_chats_store(Mock())
+    options.set_chat_db(Mock())
     return options
 
 
@@ -30,7 +29,7 @@ async def test_options(mocked_options_factory, options):
 
     chat = Chat(42)
     chat.chat_id_admin = 42
-    options.chats.get.return_value = chat
+    options.chats_db.get.return_value = chat
 
     await options.options(mocked_update, mocked_context)
 
@@ -48,7 +47,7 @@ async def test_options_no_admin(mocked_options_factory, options):
 
     chat = Chat(42)
     chat.chat_id_admin = 1337
-    options.chats.get.return_value = chat
+    options.chats_db.get.return_value = chat
 
     await options.options(mocked_update, mocked_context)
 
@@ -64,7 +63,7 @@ async def test_options_no_valid_chat(mocked_options_factory, options):
     mocked_update = AsyncMock()
     mocked_update.message.from_user.id = 42
 
-    options.chats.get.return_value = None
+    options.chats_db.get.return_value = None
 
     await options.options(mocked_update, mocked_context)
 
@@ -80,7 +79,7 @@ async def test_options_buttons_no_chat_no_admin(options):
     mocked_update.callback_query.from_user.id = 1337
 
     options.update = AsyncMock()
-    options.chats.get.return_value = None
+    options.chats_db.get.return_value = None
 
     await options.button(mocked_update, mocked_context)
 
@@ -88,7 +87,7 @@ async def test_options_buttons_no_chat_no_admin(options):
 
     chat = Chat(42)
     chat.chat_id_admin = 1
-    options.chats.get.return_value = chat
+    options.chats_db.get.return_value = chat
 
     await options.button(mocked_update, mocked_context)
 
@@ -107,7 +106,7 @@ async def test_options_buttons_close(options):
 
     chat = Chat(42)
     chat.chat_id_admin = 42
-    options.chats.get.return_value = chat
+    options.chats_db.get.return_value = chat
 
     options.close = AsyncMock()
     await options.button(mocked_update, mocked_context)
@@ -129,12 +128,12 @@ async def test_options_buttons_update(options):
     chat = Chat(42)
     chat.chat_id_admin = 42
     chat.is_update_interested = True
-    options.chats.get.return_value = chat
+    options.chats_db.get.return_value = chat
 
     await options.button(mocked_update, mocked_context)
 
     mocked_update.callback_query.answer.assert_called_once()
-    options.store.save.assert_called_once_with(options.chats)
+    options.chats_db.update.assert_called_once_with(chat)
     assert chat.is_update_interested is False
     options.update.assert_called_once_with(
         mocked_context, mocked_update.callback_query, chat)
@@ -143,7 +142,7 @@ async def test_options_buttons_update(options):
     await options.button(mocked_update, mocked_context)
 
     mocked_update.callback_query.answer.assert_called_once()
-    options.store.save.assert_called_with(options.chats)
+    options.chats_db.update.assert_called_with(chat)
     assert chat.is_update_interested
     options.update.assert_called_with(
         mocked_context, mocked_update.callback_query, chat)
@@ -161,12 +160,12 @@ async def test_options_buttons_news(options):
     chat = Chat(42)
     chat.chat_id_admin = 42
     chat.is_news_interested = True
-    options.chats.get.return_value = chat
+    options.chats_db.get.return_value = chat
 
     await options.button(mocked_update, mocked_context)
 
     mocked_update.callback_query.answer.assert_called_once()
-    options.store.save.assert_called_once_with(options.chats)
+    options.chats_db.update.assert_called_once_with(chat)
     assert chat.is_news_interested is False
     options.update.assert_called_once_with(
         mocked_context, mocked_update.callback_query, chat)
@@ -175,7 +174,7 @@ async def test_options_buttons_news(options):
     await options.button(mocked_update, mocked_context)
 
     mocked_update.callback_query.answer.assert_called_once()
-    options.store.save.assert_called_with(options.chats)
+    options.chats_db.update.assert_called_with(chat)
     assert chat.is_news_interested
     options.update.assert_called_with(
         mocked_context, mocked_update.callback_query, chat)

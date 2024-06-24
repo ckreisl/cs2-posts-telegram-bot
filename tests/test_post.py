@@ -17,7 +17,7 @@ def post_fixture():
                 date=1234567890,
                 feedlabel="Test label",
                 feedname="Test feed",
-                feed_type=1,
+                feed_type=0,
                 appid=730,
                 tags=["patchnotes"])
 
@@ -30,7 +30,7 @@ def post_fixture2():
                 is_external_url=True,
                 author="Test author2",
                 contents="Test body2",
-                date=1234567890,
+                date=1234567891,
                 feedlabel="Test label",
                 feedname="Test feed",
                 feed_type=1,
@@ -50,6 +50,11 @@ def test_post_is_update(post_fixture):
 
 def test_post_is_news(post_fixture2):
     assert post_fixture2.is_news()
+
+
+def test_get_feed_type(post_fixture, post_fixture2):
+    assert post_fixture.get_feed_type() == FeedType.EXTERN
+    assert post_fixture2.get_feed_type() == FeedType.INTERN
 
 
 def test_post_to_dict(post_fixture):
@@ -99,3 +104,8 @@ def test_post_is_newer_than(post_fixture, post_fixture2):
     assert not post_fixture.is_newer_than(post_fixture2)
     post_fixture2.date = 123456789
     assert post_fixture.is_newer_than(post_fixture2)
+
+
+def test_post_is_older_eq_than(post_fixture, post_fixture2):
+    assert not post_fixture.is_older_eq_than(None)
+    assert post_fixture.is_older_eq_than(post_fixture2)

@@ -14,8 +14,7 @@ from telegram.ext import CommandHandler
 from telegram.ext import ContextTypes
 
 from cs2posts.bot.chats import Chat
-from cs2posts.bot.chats import Chats
-from cs2posts.store import Store
+from cs2posts.db import ChatDatabase
 
 
 logger = logging.getLogger(__name__)
@@ -101,29 +100,21 @@ class OptionsMessageFactory:
 class Options:
 
     def __init__(self, app: Application) -> None:
-        self.__chats = None
-        self.__store = None
+        self.__chats_db = None
 
         app.add_handler(CommandHandler("options", self.options))
         app.add_handler(CallbackQueryHandler(self.button))
 
     @property
-    def chats(self) -> Chats:
-        return self.__chats
+    def chats_db(self) -> ChatDatabase:
+        return self.__chats_db
 
-    @property
-    def store(self) -> Store:
-        return self.__store
-
-    def set_chats(self, chats: Chats) -> None:
-        self.__chats = chats
-
-    def set_chats_store(self, store: Store) -> None:
-        self.__store = store
+    def set_chat_db(self, db: ChatDatabase) -> None:
+        self.__chats_db = db
 
     async def options(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
-        chat = self.chats.get(update.message.chat_id)
+        chat = self.chats_db.get(update.message.chat_id)
         if chat is None:
             return
 
@@ -144,7 +135,7 @@ class Options:
         query = update.callback_query
         await query.answer()
 
-        chat = self.chats.get(query.message.chat_id)
+        chat = self.chats_db.get(query.message.chat_id)
         if chat is None:
             return
 
@@ -158,15 +149,15 @@ class Options:
 
         if btn is ButtonData.UPDATE:
             chat.is_update_interested = not chat.is_update_interested
-            self.__store.save(self.chats)
+            self.chats_db.update(chat)
 
         if btn is ButtonData.NEWS:
             chat.is_news_interested = not chat.is_news_interested
-            self.__store.save(self.chats)
+            self.chats_db.update(chat)
 
         if btn is ButtonData.EXTERNAL_NEWS:
             chat.is_external_news_interested = not chat.is_external_news_interested
-            self.__store.save(self.chats)
+            self.chats_db.update(chat)
 
         await self.update(context, query, chat)
 
